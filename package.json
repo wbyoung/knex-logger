@@ -1,0 +1,30 @@
+{
+  "name": "knex-logger",
+  "version": "0.0.0",
+  "description": "Express middleware to log Knex.js queries",
+  "homepage": "https://github.com/wbyoung/knex-logger",
+  "bugs": {
+    "url": "https://github.com/wbyoung/knex-logger/issues"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha --report $(if [ \"$TRAVIS\" ]; then echo lcovonly; else echo html; fi) -- && if [ \"$TRAVIS\" ]; then cat ./coverage/lcov.info | ./node_modules/.bin/coveralls; fi"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/wbyoung/knex-logger.git"
+  },
+  "keywords": [
+    "knex",
+    "express",
+    "log",
+    "debug",
+    "query",
+    "sql",
+    "postgresql",
+    "mysql",
+    "sqlite"
+  ],
+  "author": "Whitney Young",
+  "license": "MIT"
+}
