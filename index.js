@@ -16,13 +16,13 @@ module.exports = function(knex, options) {
     // request
 
     var queries = [];
-    var watchQuery = function(data, query) {
+    var watchQuery = function(query) {
       var start = process.hrtime();
       query.on('end', function() {
         var diff = process.hrtime(start);
         var ms = diff[0] * 1e3 + diff[1] * 1e-6;
-        data.duration = ms.toFixed(3);
-        queries.push(data);
+        query.duration = ms.toFixed(3);
+        queries.push(query);
       });
     };
 
@@ -31,13 +31,13 @@ module.exports = function(knex, options) {
       res.removeListener('close', logQuery);
       knex.client.removeListener('query', watchQuery);
 
-      queries.forEach(function(data) {
+      queries.forEach(function(query) {
         var color = chalk.gray;
         console.log('%s %s %s %s',
           chalk.gray('SQL'),
-          color(data.sql),
-          chalk.cyan('{' + data.bindings.join(', ') + '}'),
-          chalk.magenta(data.duration + 'ms'));
+          color(query.sql),
+          chalk.cyan('{' + query.bindings.join(', ') + '}'),
+          chalk.magenta(query.duration + 'ms'));
       });
     };
 
