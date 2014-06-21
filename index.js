@@ -2,12 +2,17 @@
 
 var chalk = require('chalk');
 
+var colored = function(fn) {
+  return function() {
+    var enabled = chalk.enabled;
+    chalk.enabled = true;
+    fn.apply(this, arguments);
+    chalk.enabled = enabled;
+  }
+};
+
 module.exports = function(knex, options) {
   var opts = options || {};
-
-  if (opts.forceColor) {
-    chalk.enabled = true;
-  }
 
   return function(req, res, next) {
 
@@ -26,7 +31,7 @@ module.exports = function(knex, options) {
       });
     };
 
-    var logQuery = function() {
+    var logQuery = colored(function() {
       res.removeListener('finish', logQuery);
       res.removeListener('close', logQuery);
       knex.client.removeListener('query', watchQuery);
@@ -39,7 +44,7 @@ module.exports = function(knex, options) {
           chalk.cyan('{' + query.bindings.join(', ') + '}'),
           chalk.magenta(query.duration + 'ms'));
       });
-    };
+    });
 
     knex.client.on('query', watchQuery);
     res.on('finish', logQuery);
