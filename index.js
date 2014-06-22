@@ -21,22 +21,32 @@ module.exports = function(knex, options) {
     // request
 
     var queries = [];
-    var watchQuery = function(query) {
-      query._startTime = process.hrtime();
+    var captureQueries = function(builder) {
+      var startTime = process.hrtime();
+      var group = []; // captured for this builder
+
+      builder.on('query', function(query) {
+        group.push(query);
+        queries.push(query);
+      });
+      builder.on('end', function() {
+        // all queries are completed at this point.
+        // in the future, it'd be good to separate out each individual query,
+        // but for now, this isn't something that knex supports. see the
+        // discussion here for details:
+        // https://github.com/tgriesser/knex/pull/335#issuecomment-46787879
+        var diff = process.hrtime(startTime);
+        var ms = diff[0] * 1e3 + diff[1] * 1e-6;
+        group.forEach(function(query) {
+          query.duration = ms.toFixed(3);
+        });
+      });
     };
 
-    var recordQuery = function(query) {
-      var diff = process.hrtime(query._startTime);
-      var ms = diff[0] * 1e3 + diff[1] * 1e-6;
-      query.duration = ms.toFixed(3);
-      queries.push(query);
-    };
-
-    var logQuery = colored(function() {
-      res.removeListener('finish', logQuery);
-      res.removeListener('close', logQuery);
-      knex.client.removeListener('query', watchQuery);
-      knex.client.removeListener('end', recordQuery);
+    var logQueries = colored(function() {
+      res.removeListener('finish', logQueries);
+      res.removeListener('close', logQueries);
+      knex.client.removeListener('start', captureQueries);
 
       queries.forEach(function(query) {
         var color = chalk.gray;
@@ -48,10 +58,9 @@ module.exports = function(knex, options) {
       });
     });
 
-    knex.client.on('query', watchQuery);
-    knex.client.on('end', recordQuery);
-    res.on('finish', logQuery);
-    res.on('close', logQuery);
+    knex.client.on('start', captureQueries);
+    res.on('finish', logQueries);
+    res.on('close', logQueries);
 
     next();
   };
