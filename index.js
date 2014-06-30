@@ -49,11 +49,11 @@ module.exports = function(knex, options) {
       knex.client.removeListener('start', captureQueries);
 
       queries.forEach(function(query) {
-        var color = chalk.gray;
+        var color = chalk.cyan;
         console.log('%s %s %s %s',
           chalk.gray('SQL'),
           color(query.sql),
-          chalk.cyan('{' + query.bindings.join(', ') + '}'),
+          chalk.gray('{' + query.bindings.join(', ') + '}'),
           chalk.magenta(query.duration + 'ms'));
       });
     });
