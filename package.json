@@ -1,6 +1,6 @@
 {
   "name": "knex-logger",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Express middleware to log Knex.js queries",
   "homepage": "https://github.com/wbyoung/knex-logger",
   "bugs": {
